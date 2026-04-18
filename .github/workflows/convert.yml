@@ -1,4 +1,3 @@
-
 name: Convert Sub to Clash
 
 on:
@@ -14,11 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install subconverter
+      - name: Download subconverter
         run: |
-          git clone https://github.com/tindy2013/subconverter.git
-          cd subconverter
-          chmod +x subconverter
+          wget -O subconverter.tar.gz https://github.com/tindy2013/subconverter/releases/latest/download/subconverter_linux64.tar.gz
+          tar -xzf subconverter.tar.gz
+          chmod +x subconverter/subconverter
 
       - name: Prepare subscription
         run: |
@@ -26,8 +25,7 @@ jobs:
 
       - name: Convert to Clash
         run: |
-          cd subconverter
-          ./subconverter -g -f ../decoded.txt -o ../clash.yaml
+          ./subconverter/subconverter -g -f decoded.txt -o clash.yaml
 
       - name: Commit result
         run: |
