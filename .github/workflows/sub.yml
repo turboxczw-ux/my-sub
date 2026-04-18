@@ -1,0 +1,25 @@
+name: Update Free Nodes
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Fetch nodes
+      run: |
+        curl -L https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge_base64.txt -o sub.txt
+
+    - name: Commit
+      run: |
+        git config --global user.name "bot"
+        git config --global user.email "bot@example.com"
+        git add sub.txt
+        git commit -m "update" || echo "no change"
+        git push
