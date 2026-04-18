@@ -17,11 +17,19 @@ jobs:
         run: |
           git clone https://github.com/tindy2013/subconverter.git
           cd subconverter
-          chmod +x subconverter
+          chmod +x subconverter_linux64
 
       - name: Convert
         run: |
-          ./subconverter/subconverter -g
+          cd subconverter
+          echo "url=$(cat ../sub.txt)" > pref.ini
+          echo "target=clash" >> pref.ini
+          echo "list=true" >> pref.ini
+          ./subconverter_linux64
+
+      - name: Move result
+        run: |
+          cp subconverter/output/* ./clash.yaml || true
 
       - name: Commit result
         run: |
