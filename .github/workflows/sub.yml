@@ -1,25 +1,46 @@
-name: Update Free Nodes
+name: Auto Free Nodes
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *'   # 每6小时更新
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Fetch nodes
-      run: |
-        curl -L https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge_base64.txt -o sub.txt
+      # ✅ 抓多个免费源（公开项目，自动更新）
+      - name: Fetch sources
+        run: |
+          mkdir data
 
-    - name: Commit
-      run: |
-        git config --global user.name "bot"
-        git config --global user.email "bot@example.com"
-        git add sub.txt
-        git commit -m "update" || echo "no change"
-        git push
+          curl -L https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge_base64.txt -o data/a.txt || true
+          curl -L https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2 -o data/b.txt || true
+
+      # ✅ 合并 + 去重 + 简单筛选
+      - name: Merge & Filter
+        run: |
+          cat data/*.txt > all.txt || true
+
+          # 去空行
+          sed '/^$/d' all.txt > clean.txt
+
+          # 去重
+          sort clean.txt | uniq > sub.txt
+
+      # ✅ 提交
+      - name: Commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add sub.txt
+          git commit -m "update free nodes" || echo "no changes"
+          git push
