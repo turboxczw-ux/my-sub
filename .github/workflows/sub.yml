@@ -10,26 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Fetch and merge
-      run: |
-        mkdir -p data
+      - name: Fetch and merge subscriptions
+        run: |
+          mkdir -p sub
+          curl -L https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2 -o sub/a.txt
+          curl -L https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/sub_merge.txt -o sub/b.txt
 
-        curl -L https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2 > data/1.txt
-        curl -L https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/sub_merge.txt > data/2.txt
+          cat sub/a.txt sub/b.txt > sub/all.txt
 
-        cat data/*.txt > sub.txt
+      - name: Base64 encode (for Shadowrocket)
+        run: |
+          base64 sub/all.txt > sub/sub.txt
 
-    - name: Encode base64 (for Shadowrocket)
-      run: |
-        base64 sub.txt > sub_base64.txt
-
-    - name: Commit
-      run: |
-        git config --global user.name "bot"
-        git config --global user.email "bot@users.noreply.github.com"
-        git add .
-        git commit -m "update" || echo "no changes"
-        git push
+      - name: Commit
+        run: |
+          git config --global user.name "bot"
+          git config --global user.email "bot@example.com"
+          git add sub/sub.txt
+          git commit -m "update sub" || echo "no change"
+          git push
