@@ -1,1 +1,38 @@
 
+name: Convert Sub to Clash
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install subconverter
+        run: |
+          git clone https://github.com/tindy2013/subconverter.git
+          cd subconverter
+          chmod +x subconverter
+
+      - name: Prepare subscription
+        run: |
+          echo "$(cat sub.txt)" | base64 -d > decoded.txt
+
+      - name: Convert to Clash
+        run: |
+          cd subconverter
+          ./subconverter -g -f ../decoded.txt -o ../clash.yaml
+
+      - name: Commit result
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add clash.yaml
+          git commit -m "update clash config" || echo "no changes"
+          git push
