@@ -1,34 +1,32 @@
-name: Auto Free Nodes
+name: Convert Sub to Clash
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 jobs:
-  build:
+  convert:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Fetch and merge subscriptions
+      - name: Install subconverter
         run: |
-          mkdir -p sub
-          curl -L https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2 -o sub/a.txt
-          curl -L https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/sub_merge.txt -o sub/b.txt
+          git clone https://github.com/tindy2013/subconverter.git
+          cd subconverter
+          chmod +x subconverter
 
-          cat sub/a.txt sub/b.txt > sub/all.txt
-
-      - name: Base64 encode (for Shadowrocket)
+      - name: Convert
         run: |
-          base64 sub/all.txt > sub/sub.txt
+          ./subconverter/subconverter -g
 
-      - name: Commit
+      - name: Commit result
         run: |
           git config --global user.name "bot"
           git config --global user.email "bot@example.com"
-          git add sub/sub.txt
-          git commit -m "update sub" || echo "no change"
+          git add .
+          git commit -m "update clash config" || echo "no changes"
           git push
